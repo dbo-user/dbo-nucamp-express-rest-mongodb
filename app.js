@@ -11,6 +11,23 @@ const campsiteRouter = require('./routes/campsiteRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
 
+const mongoose = require('mongoose');
+
+const url = 'mongodb://localhost:27017/nucampsite';
+const connect = mongoose.connect(url, {
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useNewUrlParser: true, 
+    useUnifiedTopology: true
+});
+
+connect.then(() => console.log('HALLELUJAH! YOU ARE CONNECTED correctly to the server'), 
+    err => console.log('NOT CONNECTED TO SERVER ERROR', err)
+);
+
+const hostname = 'localhost';
+const port = 3000;
+
 var app = express();
 
 // view engine setup
@@ -44,6 +61,10 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+app.listen(port, hostname, () => {
+  console.log(`Hey Look, The Server is running at http://${hostname}:${port}/`);
 });
 
 module.exports = app;
