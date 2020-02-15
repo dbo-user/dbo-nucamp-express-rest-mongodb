@@ -1,10 +1,10 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const Promotion = require('../models/promotion');
+const express = require('express'); // import the express module into the express variable
+const bodyParser = require('body-parser'); // import the body-parser module to extract the body from HTTP requests
+const Promotion = require('../models/promotion'); // import the promotion model from the models folder
 
-const promotionRouter = express.Router();
+const promotionRouter = express.Router(); // create promotion router object
 
-promotionRouter.use(bodyParser.json());
+promotionRouter.use(bodyParser.json()); // use bodyParser to make data available in req.body
 
 promotionRouter.route('/')
 .get((req, res, next) => {
