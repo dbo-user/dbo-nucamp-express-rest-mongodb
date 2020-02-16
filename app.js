@@ -38,6 +38,34 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+// authentication
+function auth(req, res, next) {
+  console.log('**REQUEST HEADER', req.headers);
+  const authHeader = req.headers.authorization;
+  // if authHeader is null
+  if (!authHeader) {
+      const err = new Error('You are NOT authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401; // unauthorized code
+      return next(err); // pass error to express
+  }
+  // parse user name and password to the auth array
+  const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+  console.log('**AUTH HEADER is ', authHeader);
+  console.log('**AUTH is ',auth);
+  const user = auth[0];
+  const pass = auth[1];
+  if (user === 'admin' && pass === 'password') {
+      return next(); // authorized, access is granted
+  } else {
+      const err = new Error('You are so not authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');      
+      err.status = 401;
+      return next(err);
+  }
+}
+app.use(auth);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
