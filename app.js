@@ -4,6 +4,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const session = require('express-session');
+// session-file-store will return a function and it will be called using session
+const FileStore = require('session-file-store')(session); 
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -37,12 +41,21 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser('12345-67890-09876-54321')); // cookie key
+//app.use(cookieParser('12345-67890-09876-54321')); // cookie key
+
+app.use(session({
+  name: 'session-id',
+  secret: '12345-67890-09876-54321',
+  saveUninitialized: false, // prevents empty session files
+  resave: false,
+  store: new FileStore() // creates FileStore object of session on client's disk
+}));
 
 // authentication
 function auth(req, res, next) {
-  console.log('**REQUEST HEADER', req.headers);
-  if (!req.signedCookies.user) {
+  console.log('**SESSION is here', req.session);
+  console.log('**REQUEST HEADER is here', req.headers);
+  if (!req.session.user) {
     const authHeader = req.headers.authorization;
     // if authHeader is null
     if (!authHeader) {
@@ -53,12 +66,12 @@ function auth(req, res, next) {
     }
     // parse user name and password to the auth array
     
-    const auth1 = Buffer.from(authHeader.split(' ')[1], 'base64');
-    console.log('AUTH1 is ', auth1);
-    let auth2 = auth1.toString();
-    console.log('AUTH2 is', auth2);
-    let auth3 = auth2.split(':');
-    console.log('AUTH3 is ',auth3);
+    //const auth1 = Buffer.from(authHeader.split(' ')[1], 'base64');
+    //console.log('AUTH1 is ', auth1);
+    //let auth2 = auth1.toString();
+    //console.log('AUTH2 is', auth2);
+    //let auth3 = auth2.split(':');
+    //console.log('AUTH3 is ',auth3);
 
 
     const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
@@ -67,7 +80,7 @@ function auth(req, res, next) {
     const user = auth[0];
     const pass = auth[1];
     if (user === 'admin' && pass === 'password') {
-        res.cookie('user', 'admin', {signed: true}); // create cookie  
+      req.session.user = 'admin'; // session username is admin
         return next(); // authorized, access is granted
     } else {
         const err = new Error('You are so not authenticated!');
@@ -76,7 +89,7 @@ function auth(req, res, next) {
         return next(err);
       }
   } else {
-    if (req.signedCookies.user === 'admin') {
+    if (req.session.user === 'admin') {
         return next(); // access granted
     } else {
         const err = new Error('Wait, you are not authenticated!');
