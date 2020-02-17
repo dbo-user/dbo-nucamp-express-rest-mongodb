@@ -7,6 +7,8 @@ var logger = require('morgan');
 const session = require('express-session');
 // session-file-store will return a function and it will be called using session
 const FileStore = require('session-file-store')(session); 
+const passport = require('passport');
+const authenticate = require('./authenticate');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -51,14 +53,18 @@ app.use(session({
   store: new FileStore() // creates FileStore object of session on client's disk
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 // authentication
 function auth(req, res, next) {
+  console.log('**USER is here ', req.user);
   console.log('**SESSION is here', req.session);
   console.log('**REQUEST HEADER is here', req.headers);
-  if (!req.session.user) {
+  if (!req.user) {
         const err = new Error('BUT, You are NOT authenticated!');
         err.status = 401; // unauthorized code
         return next(err); // pass error to express
@@ -78,13 +84,7 @@ function auth(req, res, next) {
     //const pass = auth[1];
     
   } else {
-    if (req.session.user === 'authenticated') {
-        return next(); // access granted
-    } else {
-        const err = new Error('Wait, you are not authenticated!');
-        err.status = 401;
-        return next(err);
-      }
+        return next();
     }
 } // end auth function
 app.use(auth);
