@@ -1,6 +1,7 @@
 const express = require('express'); // import the express module into the express variable
 const bodyParser = require('body-parser'); // import the body-parser module to extract the body from HTTP requests
 const Partner = require('../models/partner'); // import the partner model from the models folder
+const authenticate = require('../authenticate');
 
 const partnerRouter = express.Router(); // create partner router object
 
@@ -19,7 +20,7 @@ partnerRouter.route('/')
     .catch(err => next(err)); // not successful do this default error handler 
 })
 // POST request to post new partner data
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     Partner.create(req.body)
     .then(partner => {
         console.log('Partner Created ', partner);
@@ -30,12 +31,12 @@ partnerRouter.route('/')
     .catch(err => next(err));
 })
 // PUT request to update is not allowed
-.put((req, res) => {
+.put(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /partners');
 })
 // DELETE request to delete partner
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Partner.deleteMany()
     .then(response => {
         res.statusCode = 200;
@@ -57,12 +58,12 @@ partnerRouter.route('/:partnerId')
     .catch(err => next(err));
 })
 // POST to a specific id is not allowed
-.post((req, res) => {
+.post(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /partners/${req.params.partnerId}`);
 })
 // PUT request to update a specific id 
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
     Partner.findByIdAndUpdate(req.params.partnerId, {
         $set: req.body
     }, { new: true })
@@ -74,7 +75,7 @@ partnerRouter.route('/:partnerId')
     .catch(err => next(err));
 })
 // DELETE request to a specific id
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Partner.findByIdAndDelete(req.params.partnerId)
     .then(response => {
         res.statusCode = 200;
