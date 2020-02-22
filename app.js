@@ -1,5 +1,5 @@
-var createError = require('http-errors');
-var express = require('express');
+var createError = require('http-errors'); // imports
+var express = require('express'); // imports access to the express module
 var path = require('path');
 var logger = require('morgan');
 
@@ -30,7 +30,7 @@ connect.then(() => console.log('HALLELUJAH! YOU ARE CONNECTED correctly to the s
 const hostname = 'localhost';
 const port = 3000;
 
-var app = express();
+var app = express(); // Create a new Express Instance to create an express application
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -71,5 +71,5 @@ app.use(function(err, req, res, next) {
 app.listen(port, hostname, () => {
   console.log(`Hey Look, The Server is running at http://${hostname}:${port}/`);
 });
-
+// export so other files are allowed to access the exported code
 module.exports = app;

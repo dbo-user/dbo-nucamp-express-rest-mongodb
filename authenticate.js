@@ -1,4 +1,4 @@
-const passport = require('passport');
+const passport = require('passport'); // allows managing authentication
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('./models/user');
 const JwtStrategy = require('passport-jwt').Strategy;
@@ -39,6 +39,18 @@ exports.jwtPassport = passport.use(
         }
     )
 );
-
-// verify request is from authenticated user
+// is the user logged in? verify the request is from authenticated user
 exports.verifyUser = passport.authenticate('jwt', {session: false});
+
+// week 3 assignment, verify if the user is admin
+exports.verifyAdmin = function (req, res, next) {
+    // does the admin flag equal true?
+    if (req.user.admin) {
+        next(); // pass to the next middleware
+    } else {
+        // if the user is not admin return error
+        var err = new Error('You are not authorized to perform this operation!');
+        err.status = 403; // forbidden status code
+        return next(err);
+    }
+};

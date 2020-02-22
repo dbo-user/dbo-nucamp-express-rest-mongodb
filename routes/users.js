@@ -5,10 +5,32 @@ const authenticate = require('../authenticate');
 
 const router = express.Router();
 
-/* GET users listing. */
+// week 3 assignment, only allow admin users to access user documents 
+/*
+router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function(req, res, next) {
+  if (req.user.admin) {
+    res.send(req.body)
+  } else {
+    res.send('what?????')
+  }
+  
+});  */
+
+router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function(req, res, next) {
+  //if (req.user.admin) {
+    User.find()
+    .then(users => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(users);
+    })
+    .catch(err => next(err));
+  //}  
+}); 
+/*
 router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+  res.send(req.body);
+}); */
 
 // allows user to register on website
 router.post('/signup', (req, res) => {
