@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/user');
 const passport = require('passport');
 const authenticate = require('../authenticate');
+const cors = require('./cors'); // import cross-origin from routes folder
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function(req,
   
 });  */
 
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function(req, res, next) {
+router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, function(req, res, next) {
   //if (req.user.admin) {
     User.find()
     .then(users => {
@@ -33,7 +34,7 @@ router.get('/', function(req, res, next) {
 }); */
 
 // allows user to register on website
-router.post('/signup', (req, res) => {
+router.post('/signup', cors.corsWithOptions, (req, res) => {
   // passport register method
   User.register(
       new User({username: req.body.username}),
@@ -69,7 +70,7 @@ router.post('/signup', (req, res) => {
 });
 
 // user already logged in
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
     const token = authenticate.getToken({_id: req.user._id});
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
@@ -77,7 +78,7 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
 });
 
 // logging out user
-router.get('/logout', (req, res, next) => {
+router.get('/logout', cors.corsWithOptions, (req, res, next) => {
   if (req.session) {
     // if session exists, remove it
     req.session.destroy();

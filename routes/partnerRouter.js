@@ -2,6 +2,7 @@ const express = require('express'); // import the express module into the expres
 const bodyParser = require('body-parser'); // import the body-parser module to extract the body from HTTP requests
 const Partner = require('../models/partner'); // import the partner model from the models folder
 const authenticate = require('../authenticate');
+const cors = require('./cors'); // import cross-origin from routes folder
 
 const partnerRouter = express.Router(); // create partner router object
 
@@ -10,7 +11,8 @@ partnerRouter.use(bodyParser.json()); // use bodyParser to make data available i
 // define router endpoint for HTTP requests
 partnerRouter.route('/')
 // GET request to find the partner information
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Partner.find()
     .then(partners => { // successful find operation so do this
         res.statusCode = 200; // success code
@@ -48,7 +50,8 @@ partnerRouter.route('/')
 
 // endpoint for a specific partner id
 partnerRouter.route('/:partnerId')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Partner.findById(req.params.partnerId)
     .then(partner => {
         res.statusCode = 200;
@@ -58,12 +61,12 @@ partnerRouter.route('/:partnerId')
     .catch(err => next(err));
 })
 // POST to a specific id is not allowed
-.post(authenticate.verifyUser, (req, res) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /partners/${req.params.partnerId}`);
 })
 // PUT request to update a specific id 
-.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Partner.findByIdAndUpdate(req.params.partnerId, {
         $set: req.body
     }, { new: true })
@@ -75,7 +78,7 @@ partnerRouter.route('/:partnerId')
     .catch(err => next(err));
 })
 // DELETE request to a specific id
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Partner.findByIdAndDelete(req.params.partnerId)
     .then(response => {
         res.statusCode = 200;
