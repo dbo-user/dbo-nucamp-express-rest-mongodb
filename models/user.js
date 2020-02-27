@@ -12,6 +12,7 @@ const userSchema = new Schema({
     type: String,
         default: ''
     },
+    facebookId: String, //for facebook login
     admin: {
         type: Boolean,
         default: false

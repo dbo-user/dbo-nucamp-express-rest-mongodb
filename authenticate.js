@@ -4,6 +4,7 @@ const User = require('./models/user');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
+const FacebookTokenStrategy = require('passport-facebook-token'); // use faceboom module for facebook login authentication
 
 const config = require('./config.js');
 
@@ -54,3 +55,35 @@ exports.verifyAdmin = function (req, res, next) {
         return next(err);
     }
 };
+
+exports.facebookPassport = passport.use(
+    new FacebookTokenStrategy(
+        {   // get the Api id and secret from the config file
+            clientID: config.facebook.clientId,
+            clientSecret: config.facebook.clientSecret
+        }, 
+        (accessToken, refreshToken, profile, done) => {
+            // search for user with facebook id that matches profile id
+            User.findOne({facebookId: profile.id}, (err, user) => {
+                if (err) {
+                    return done(err, false); // error
+                }
+                if (!err && user) { // no error but user already exists without facebook id
+                    return done(null, user);
+                } else { // create new user with facebook id
+                    user = new User({ username: profile.displayName });
+                    user.facebookId = profile.id;
+                    user.firstname = profile.name.givenName;
+                    user.lastname = profile.name.familyName;
+                    user.save((err, user) => {
+                        if (err) {
+                            return done(err, false); // error trying to save user
+                        } else {
+                            return done(null, user); // successful save
+                        }
+                    });
+                }
+            });
+        }
+    )
+);
