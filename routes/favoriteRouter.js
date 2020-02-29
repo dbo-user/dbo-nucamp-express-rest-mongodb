@@ -141,6 +141,8 @@ favoriteRouter.route('/:campsiteId')
           res.end(`Campsite ${req.params.campsiteId} is already in the list of favorites.`);
        } // else not in the list
         else {
+          favorite = new Favorite({ user: req.user._id });
+          favorite.campsites = [];
           favorite.campsites.push({ _id: req.params.campsiteId });
           favorite.save()
             .then(favorite => {
