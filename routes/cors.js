@@ -4,7 +4,7 @@ const cors = require('cors'); // cross origin resource sharing
 const whitelist = ['http://localhost:3000', 'https://localhost:3443'];
 const corsOptionsDelegate = (req, callback) => {
     let corsOptions;
-    console.log(`HEADER ${req.header('Origin')}`);
+    //console.log(`HEADER ${req.header('Origin')}`);
     // search for string in header, !-1 means a match was found
     if(whitelist.indexOf(req.header('Origin')) !== -1) {
         corsOptions = { origin: true }; // allow request
